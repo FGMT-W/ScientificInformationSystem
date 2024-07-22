@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>论文收录平台</title>
+    <script th:src="@{/js/jquery-3.4.1.js}"></script>
+    <script th:src="@{/layui/layui.js}"></script>
+    <script th:src="@{/js/user/thesis.js}"></script>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/layuiadmin/style/admin.css}" media="all">
+
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md16">
+            <div class="layui-card">
+                <div class="layui-card-header">论文收录平台</div>
+                <div class="layui-card-body">
+
+                    <blockquote class="layui-elem-quote layui-quote-nm">
+                        <button class="layui-btn" onclick="btn_addThesis()">论文录入</button>
+                    </blockquote>
+                    <blockquote class="layui-elem-quote layui-quote-nm">
+                        <form class="layui-form">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label">论文查询</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="input" id="input" lay-verify="required" style="width:400px;" placeholder="请输入论文名称，支持模糊查询" autocomplete="off" class="layui-input">
+                                    </div>
+                                </div>
+                                <button type="button" class="layui-btn layui-btn-normal" id="search">
+                                    <i class="layui-icon">&#xe615;</i>
+                                </button>
+                            </div>
+                        </form>
+                    </blockquote>
+                    <blockquote class="layui-elem-quote layui-quote-nm">
+                        <!--论文信息的表格-->
+                        <table id="table_thesis" lay-filter="table_thesis"></table>
+                    </blockquote>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--论文录入的弹窗-->
+<div style="padding-left:20px;padding-right:20px;padding-top:20px" id="div_addThesis" hidden>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>中/英名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="thesisname" id="thesisname" lay-verify="required" placeholder="格式:中文名称-EnglishTitle" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>论文作者</label>
+            <div class="layui-input-inline">
+                <input type="text" name="author" id="author" lay-verify="required" placeholder="请输入作者姓名" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>论文类别</label>
+            <div class="layui-input-block">
+                <select name="type" id="type" class="layui-input" lay-verify="required">
+                    <option value="">请选择</option>
+                    <option value="EI">EI</option>
+                    <option value="SCI">SCI</option>
+                    <option value="TPSI">TPSI</option>
+                    <option value="SCIE">SCIE</option>
+                    <option value="核心">核心</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>发表时间</label>
+            <div class="layui-input-inline">
+                <input type="text" name="startTime" id="startTime"  autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>发表刊物</label>
+            <div class="layui-input-inline">
+                <input type="text" name="publication" id="publication" lay-verify="required" style="width:400px;" placeholder="请输入发表刊物" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>摘要</label>
+            <div class="layui-input-inline">
+                <input type="text" name="thesisabstract" id="thesisabstract" lay-verify="required" style="width:400px;" placeholder="请将摘要控制在100~200字左右" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="color:red">*</span>论文上传</label>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn layui-btn-sm" id="btn_selectThesis"><i class="layui-icon layui-icon-upload-drag"></i>选择论文</button>
+                <button type="button" class="layui-btn layui-btn-sm" id="btn_uploadThesis"><i class="layui-icon layui-icon-upload"></i>开始上传</button>
+            </div>
+            <div id="thesis"></div>
+        </div>
+        <div class="layui-form-mid layui-word-aux">请上传文档格式</div>
+        <!--<input id="thesisId2" name="id" hidden>-->
+        <input id="thesisPath" name="thesisPath" hidden>
+    </form>
+</div>
+
+<!--修改表格的工具列-->
+<script type="text/html" id="toolbar">
+    {{# if(d.status === "审核通过"){ }}
+    <!--<a class="operation" lay-event="download" title="下载论文">
+        <i class="layui-icon layui-icon-download-circle"></i>下载
+    </a>-->
+    <a class="operation" style="margin-left:10px;" lay-event="del" title="删除论文">
+        <i class="layui-icon layui-icon-close"></i>删除
+    </a>
+    {{#  } }}
+    {{# if(d.status === "审核不通过"){ }}
+    <a class="operation" style="margin-left:10px;" lay-event="del" title="删除论文">
+        <i class="layui-icon layui-icon-close"></i>删除
+    </a>
+    {{#  } }}
+</script>
+<!--修改表格的状态列-->
+<script type="text/html" id="statusbar">
+    {{# if(d.status === "待审核"){ }}
+    <span style="color:#ffd800;">待审核</span>
+    {{#  } }}
+    {{# if(d.status === "审核通过"){ }}
+    <span style="color:#00FF00;">审核通过</span>
+    {{#  } }}
+    {{# if(d.status === "审核不通过"){ }}
+    <span style="color:#CF1900;">审核不通过</span>
+    {{#  } }}
+</script>
+</body>
+</html>
